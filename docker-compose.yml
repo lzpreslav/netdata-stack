@@ -1,0 +1,39 @@
+---
+version: '3.9'
+
+services:
+  netdata:
+    image: netdata/netdata:${NETDATA_TAG:-latest}
+    container_name: netdata
+    hostname: ${NETDATA_NAME:-netdata}
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ${NETDATACONFIG_VOLUME:-netdataconfig}:/etc/netdata
+      - ${NETDATALIB_VOLUME:-netdatalib}:/var/lib/netdata
+      - ${NETDATACACHE_VOLUME:-netdatacache}:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - ${OS_RELEASE_FILE:-/etc/os-release}:/host/etc/os-release:ro
+    environment:
+      DOCKER_HOST: 'docker-socket-proxy:2375'
+      NETDATA_CLAIM_TOKEN:
+      NETDATA_CLAIM_URL:
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:${DOCKER_SOCKET_PROXY_TAG:-latest}
+    container_name: docker-socket-proxy
+    volumes:
+     - ${DOCKER_HOST:-/var/run/docker.sock}:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: '1'
+volumes:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
