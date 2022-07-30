@@ -26,13 +26,22 @@ services:
       DOCKER_HOST: 'docker-socket-proxy:2375'
       NETDATA_CLAIM_TOKEN:
       NETDATA_CLAIM_URL:
+    networks:
+      - netdata
+      - traefik
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy:${DOCKER_SOCKET_PROXY_TAG:-latest}
-    container_name: docker-socket-proxy
     volumes:
      - ${DOCKER_HOST:-/var/run/docker.sock}:/var/run/docker.sock:ro
     environment:
       CONTAINERS: '1'
+    networks:
+      - netdata
+networks:
+  netdata:
+  traefik:
+    name: traefik
+    external: true
 volumes:
   netdataconfig:
   netdatalib:
